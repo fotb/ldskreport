@@ -69,9 +69,15 @@ public class ComputerReportImpl implements IComputerReport{
 	        final int computerCount = reportBO.findAllComputerCount();
 	        final int dellCount = compSystemBO.findCountByModel("Dell");
 	        final int lenovoCount = compSystemBO.findCountByModel("Lenovo");
+	        final int hpCount = compSystemBO.findCountByModel("HP") + compSystemBO.findCountByModel("Hewlett-Packard");
 	        writer.writeTo(0, 0, Short.valueOf("1").shortValue(), String.valueOf(dellCount));
 	        writer.writeTo(0, 0, Short.valueOf("3").shortValue(), String.valueOf(lenovoCount));
-	        writer.writeTo(0, 0, Short.valueOf("5").shortValue(), String.valueOf(computerCount - dellCount - lenovoCount));
+	        writer.writeTo(0, 0, Short.valueOf("5").shortValue(), String.valueOf(hpCount));
+	        writer.newRow();
+	        writer.newCell(cellStyle);
+	        writer.writeToCurrentCell("其他:");
+	        writer.newCell();
+	        writer.writeToCurrentCell(String.valueOf(computerCount - dellCount - lenovoCount - hpCount));
 	        writer.newRow();
 	        writer.newCell(cellStyle);
 	        writer.writeToCurrentCell("电脑总数:");
