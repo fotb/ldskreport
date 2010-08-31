@@ -160,7 +160,7 @@ public class ComputerReportImpl implements IComputerReport{
 		        writer.newCell(cellStyle);
 		        writer.writeToCurrentCell("分行总数:");
 		        writer.newCell();
-		        writer.writeToCurrentCell(String.valueOf(lCount + dCount + otherCount));
+		        writer.writeToCurrentCell(String.valueOf(lCount + dCount + hCount + otherCount));
 			}
 	        
         } catch(Exception e) {
