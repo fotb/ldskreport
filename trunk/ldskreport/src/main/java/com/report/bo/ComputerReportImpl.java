@@ -75,7 +75,7 @@ public class ComputerReportImpl implements IComputerReport{
 	        writer.writeTo(0, 0, Short.valueOf("5").shortValue(), String.valueOf(hpCount));
 	        writer.newRow();
 	        writer.newCell(cellStyle);
-	        writer.writeToCurrentCell("其他:");
+	        writer.writeToCurrentCell("其他品牌:");
 	        writer.newCell();
 	        writer.writeToCurrentCell(String.valueOf(computerCount - dellCount - lenovoCount - hpCount));
 	        writer.newRow();
@@ -105,6 +105,7 @@ public class ComputerReportImpl implements IComputerReport{
 		        createHeader(writer, cellStyle);
 		        int dCount = 0;
 		        int lCount = 0;
+		        int hCount = 0;
 		        int otherCount = 0;
 		        int index = 1;
 		        for (Iterator iter = computerVOList.iterator(); iter.hasNext();) {
@@ -128,7 +129,11 @@ public class ComputerReportImpl implements IComputerReport{
 						dCount++;
 					} else if(null != compSystemVO.getManufacturer() && compSystemVO.getManufacturer().indexOf("Lenovo") != -1) {
 						lCount++;
-					} else {
+					} else if(null != compSystemVO.getManufacturer() 
+							&& (compSystemVO.getManufacturer().indexOf("HP") != -1
+							|| compSystemVO.getManufacturer().indexOf("Hewlett-Packard") != -1)) {
+						hCount++;
+					}else {
 						otherCount++;
 					}
 					index++;
@@ -142,6 +147,11 @@ public class ComputerReportImpl implements IComputerReport{
 		        writer.writeToCurrentCell("Lenovo总数:");
 		        writer.newCell();
 		        writer.writeToCurrentCell(String.valueOf(lCount));
+		        writer.newCell(cellStyle);
+		        writer.writeToCurrentCell("HP总数:");
+		        writer.newCell();
+		        writer.writeToCurrentCell(String.valueOf(hCount));
+		        writer.newRow();
 		        writer.newCell(cellStyle);
 		        writer.writeToCurrentCell("其他品牌:");
 		        writer.newCell();
