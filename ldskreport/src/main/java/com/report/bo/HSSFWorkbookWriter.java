@@ -21,6 +21,7 @@ class HSSFWorkbookWriter {
     private int currSheetNum = 0;
     private int currRowNum = 0;
     private short currColNum = -1;
+    private Map sheetRowMap = new HashMap();
     private Map styleMap = new HashMap();
     
     /**
@@ -59,6 +60,15 @@ class HSSFWorkbookWriter {
         	HSSFRichTextString richString = new HSSFRichTextString(value.toString());
             cell.setCellValue(richString);      
         }
+        Object obj = sheetRowMap.get(String.valueOf(sheetNo));
+        if(null != obj) {
+        	String sheetRowNum = obj.toString();
+        	if(rowNum > Integer.valueOf(sheetRowNum).intValue()) {
+        		sheetRowMap.put(String.valueOf(sheetNo), String.valueOf(rowNum));
+        	}
+        } else {
+        	sheetRowMap.put(String.valueOf(sheetNo), String.valueOf(rowNum));
+        }
     }
     /**
      * write to current cell of excel
@@ -73,6 +83,15 @@ class HSSFWorkbookWriter {
      */
     public HSSFRow newRow() {
         currRowNum++;
+        if(sheetRowMap.containsKey(String.valueOf(currSheetNum))) {
+        	int sheetRowNum = Integer.valueOf(sheetRowMap.get(String.valueOf(currSheetNum)).toString()).intValue();
+        	sheetRowNum++;
+        	sheetRowMap.put(String.valueOf(currSheetNum), Integer.valueOf(sheetRowNum));
+        	currRowNum = sheetRowNum;
+        } else {
+        	sheetRowMap.put(String.valueOf(currSheetNum), "0");
+        	currRowNum = 0;
+        }
         currColNum = -1;
         return getCurrentSheet().createRow(currRowNum);
     }

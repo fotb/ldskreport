@@ -55,34 +55,41 @@ public class ComputerReportImpl implements IComputerReport{
 			fs = new POIFSFileSystem(resource.getInputStream());
 			wb = new HSSFWorkbook(fs);
 
-			final String sheetName = "Computer" + DateUtil.format(new Date(), "yyyyMMdd");
+			final String sheet1Name = "设备详细表";
+			final String sheet2Name = "设备汇总表";
           
-	        wb.setSheetName(0, sheetName);
+	        wb.setSheetName(0, sheet1Name);
+	        wb.setSheetName(1, sheet2Name);
+	        
 	        final HSSFSheet sheet = wb.getSheetAt(0);
 	        final HSSFRow firstRow = sheet.getRow(0);  
 	        final HSSFWorkbookWriter writer = new HSSFWorkbookWriter(wb, firstRow);
 	        
-	        HSSFCellStyle cellStyle = firstRow.getCell(0).getCellStyle();
+	        final HSSFSheet sheet2 = wb.getSheetAt(1);
+//	        final HSSFRow firstRow2 = sheet2.getRow(0);  
+//	        final HSSFWorkbookWriter writer2 = new HSSFWorkbookWriter(wb, firstRow2);
+//	        
 	        
-	        
+	        HSSFCellStyle cellStyle = sheet2.getRow(1).getCell(0).getCellStyle();
+	        HSSFCellStyle tempCellStyle = sheet2.getRow(1).getCell(1).getCellStyle();
+	                
 	        
 	        final int computerCount = reportBO.findAllComputerCount();
 	        final int dellCount = compSystemBO.findCountByModel("Dell");
 	        final int lenovoCount = compSystemBO.findCountByModel("Lenovo");
 	        final int hpCount = compSystemBO.findCountByModel("HP") + compSystemBO.findCountByModel("Hewlett-Packard");
-	        writer.writeTo(0, 0, Short.valueOf("1").shortValue(), String.valueOf(dellCount));
-	        writer.writeTo(0, 0, Short.valueOf("3").shortValue(), String.valueOf(lenovoCount));
-	        writer.writeTo(0, 0, Short.valueOf("5").shortValue(), String.valueOf(hpCount));
-	        writer.newRow();
-	        writer.newCell(cellStyle);
-	        writer.writeToCurrentCell("其他品牌:");
-	        writer.newCell();
-	        writer.writeToCurrentCell(String.valueOf(computerCount - dellCount - lenovoCount - hpCount));
-	        writer.newRow();
-	        writer.newCell(cellStyle);
-	        writer.writeToCurrentCell("电脑总数:");
-	        writer.newCell();
-	        writer.writeToCurrentCell(String.valueOf(computerCount));
+	        writer.setCurrSheetNum(1);
+	        writer.writeTo(1, 1, Short.valueOf("1").shortValue(), String.valueOf(computerCount));
+	        
+	        writer.writeTo(1, 2, Short.valueOf("1").shortValue(), String.valueOf(dellCount));
+	        writer.writeTo(1, 2, Short.valueOf("3").shortValue(), String.valueOf(lenovoCount));
+	        writer.writeTo(1, 2, Short.valueOf("5").shortValue(), String.valueOf(hpCount));
+	        writer.writeTo(1, 2, Short.valueOf("7").shortValue(), String.valueOf(computerCount - dellCount - lenovoCount - hpCount));
+//	        writer2.newRow();
+//	        writer2.newCell(cellStyle);
+//	        writer2.writeToCurrentCell("其他品牌设备总数	:");
+//	        writer2.newCell();
+//	        writer2.writeToCurrentCell(String.valueOf(computerCount - dellCount - lenovoCount - hpCount));
 	        
 	        
 	        final Map branchMap = reportBO.getAllComputerWitchBranch();
@@ -93,9 +100,8 @@ public class ComputerReportImpl implements IComputerReport{
 	        for (Iterator iterator = branchMap.keySet().iterator(); iterator.hasNext();) {
 				final String key = (String) iterator.next();
 				List computerVOList = (List)branchMap.get(key);
+				writer.setCurrSheetNum(0);
 				writer.newRow();
-		        writer.newRow();
-		        writer.newRow();
 		        writer.newCell(cellStyle);
 		        if(Constants.OTHER_DEPT_KEY.equals(key)) {
 		        	writer.writeToCurrentCell("其他部门:");	
@@ -111,19 +117,19 @@ public class ComputerReportImpl implements IComputerReport{
 		        for (Iterator iter = computerVOList.iterator(); iter.hasNext();) {
 					ComputerVO vo = (ComputerVO) iter.next();
 					writer.newRow();
-					writer.newCell();
+					writer.newCell(tempCellStyle);
 					writer.writeToCurrentCell(String.valueOf(index));
-					writer.newCell();
+					writer.newCell(tempCellStyle);
 					writer.writeToCurrentCell(vo.getDeviceName());
-					writer.newCell();
+					writer.newCell(tempCellStyle);
 					final TcpVO tcpVO = (TcpVO)ipMap.get(String.valueOf(vo.getComputerIdn()));
 					writer.writeToCurrentCell(tcpVO.getAddress());
-					writer.newCell();
+					writer.newCell(tempCellStyle);
 					writer.writeToCurrentCell(macMap.get(String.valueOf(vo.getComputerIdn())));
-					writer.newCell();
+					writer.newCell(tempCellStyle);
 					CompSystemVO compSystemVO = (CompSystemVO)modelMap.get(String.valueOf(vo.getComputerIdn()));
 					writer.writeToCurrentCell(compSystemVO.getModel());
-					writer.newCell();
+					writer.newCell(tempCellStyle);
 					writer.writeToCurrentCell(positionMap.get(String.valueOf(vo.getComputerIdn())));
 					if(null != compSystemVO.getManufacturer() && compSystemVO.getManufacturer().indexOf("Dell") != -1) {
 						dCount++;
@@ -139,28 +145,35 @@ public class ComputerReportImpl implements IComputerReport{
 					index++;
 				}
 		        writer.newRow();
+		        writer.setCurrSheetNum(1);
+		        writer.newRow();
+		        writer.newRow();
 		        writer.newCell(cellStyle);
-		        writer.writeToCurrentCell("Dell总数:");
-		        writer.newCell();
+		        if(Constants.OTHER_DEPT_KEY.equals(key)) {
+		        	writer.writeToCurrentCell("其他部门:");	
+		        } else {
+		        	writer.writeToCurrentCell(key + ":");
+		        }
+		        writer.newCell(tempCellStyle);
+		        writer.writeToCurrentCell(String.valueOf(lCount + dCount + hCount + otherCount));
+		        
+		        writer.newRow();
+		        writer.newCell(cellStyle);
+		        writer.writeToCurrentCell("Dell设备总数:");
+		        writer.newCell(tempCellStyle);
 		        writer.writeToCurrentCell(String.valueOf(dCount));
 		        writer.newCell(cellStyle);
-		        writer.writeToCurrentCell("Lenovo总数:");
-		        writer.newCell();
+		        writer.writeToCurrentCell("Lenovo设备总数:");
+		        writer.newCell(tempCellStyle);
 		        writer.writeToCurrentCell(String.valueOf(lCount));
 		        writer.newCell(cellStyle);
-		        writer.writeToCurrentCell("HP总数:");
-		        writer.newCell();
+		        writer.writeToCurrentCell("HP设备总数:");
+		        writer.newCell(tempCellStyle);
 		        writer.writeToCurrentCell(String.valueOf(hCount));
-		        writer.newRow();
 		        writer.newCell(cellStyle);
-		        writer.writeToCurrentCell("其他品牌:");
-		        writer.newCell();
+		        writer.writeToCurrentCell("其他品牌设备总数:");
+		        writer.newCell(tempCellStyle);
 		        writer.writeToCurrentCell(String.valueOf(otherCount));
-		        writer.newRow();
-		        writer.newCell(cellStyle);
-		        writer.writeToCurrentCell("分行总数:");
-		        writer.newCell();
-		        writer.writeToCurrentCell(String.valueOf(lCount + dCount + hCount + otherCount));
 			}
 	        
         } catch(Exception e) {
