@@ -2,7 +2,6 @@ package com.report.bo;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +16,6 @@ import org.springframework.core.io.ClassPathResource;
 
 import com.report.util.AppException;
 import com.report.util.Constants;
-import com.report.util.DateUtil;
 import com.report.util.ReportPropertiesLocator;
 import com.report.vo.CompSystemVO;
 import com.report.vo.ComputerVO;
