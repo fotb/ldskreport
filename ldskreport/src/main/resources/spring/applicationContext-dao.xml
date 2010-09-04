@@ -50,4 +50,16 @@
 			<ref bean="sessionFactory" />
 		</property>
 	</bean>
+	<bean id="hipsActionDAO"
+		class="com.report.dao.HipsActionDAOImpl">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="deviceControlActionDAO"
+		class="com.report.dao.DeviceControlActionDAOImpl">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
 </beans>
