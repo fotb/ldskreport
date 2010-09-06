@@ -6,7 +6,7 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
-import com.report.bo.IComputerReport;
+import com.report.bo.ISafeReport;
 
 public class ReportUtil {
 	private static final Logger logger = Logger.getLogger(ReportUtil.class);
@@ -16,7 +16,18 @@ public class ReportUtil {
 	 */
 	public static void main(String[] args) {
 		try {
-			final IComputerReport bo = (IComputerReport) SpringUtil.getBean("computerReport");
+//			final IComputerReport bo = (IComputerReport) SpringUtil.getBean("computerReport");
+//			final HSSFWorkbook workbook = bo.renderExcelReport();
+//			if(null != workbook) {
+//				final String reportPath = ReportPropertiesLocator.getInstance(true).getValue(Constants.REPORT_OUTPUT_PATH);
+//				final String reportFileName = reportPath + "report_" + System.currentTimeMillis() + ".xls";
+//				generateExcelFile(workbook, reportFileName);
+//			} else {
+//				logger.error("create excel failed!!");
+//			}
+			
+			
+			final ISafeReport bo = (ISafeReport) SpringUtil.getBean("safeReport");
 			final HSSFWorkbook workbook = bo.renderExcelReport();
 			if(null != workbook) {
 				final String reportPath = ReportPropertiesLocator.getInstance(true).getValue(Constants.REPORT_OUTPUT_PATH);
