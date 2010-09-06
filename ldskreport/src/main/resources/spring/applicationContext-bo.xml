@@ -49,4 +49,27 @@
 			</bean>
 		</property>
 	</bean>
+	<bean id="hipsActionBO" parent="transactionProxy">
+		<property name="target">
+			<bean class="com.report.bo.HipsActionBOImpl">
+				<property name="hipsActionDAO" ref="hipsActionDAO" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="deviceControlActionBO" parent="transactionProxy">
+		<property name="target">
+			<bean class="com.report.bo.DeviceControlActionBOImpl">
+				<property name="deviceControlActionDAO" ref="deviceControlActionDAO" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="safeReport" parent="transactionProxy">
+		<property name="target">
+			<bean class="com.report.bo.SafeReportImpl">
+				<property name="hipsActionBO" ref="hipsActionBO" />
+				<property name="deviceControlActionBO" ref="deviceControlActionBO" />
+				<property name="reportBO" ref="reportBO" />
+			</bean>
+		</property>
+	</bean>
 </beans>
