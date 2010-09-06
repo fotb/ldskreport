@@ -42,7 +42,7 @@ public class ReportBOImpl implements IReportBO {
 	}
 
 	public Map getAllComputerWitchBranch() throws AppException{
-		final Map branchMap = unmodeledDataDAO.findAllByMetaObjAttrRelationsIdn(ReportPropertiesLocator.getInstance(true).getValue(Constants.PROPERTIES_BRANCK_KEY));
+		final Map branchMap = unmodeledDataDAO.findAllByMetaObjAttrRelationsIdn(ReportPropertiesLocator.getInstance(true).getValue(Constants.PROPERTIES_BRANCH_KEY));
 		final List computerList = computerDAO.findAll();
 		Map map = new HashMap();
 		for (Iterator iterator = computerList.iterator(); iterator.hasNext();) {
