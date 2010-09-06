@@ -5,5 +5,8 @@ import java.util.Map;
 
 public interface IHipsActionBO {
 	List findAll();
+
+	Map getHipsActionGroupByComputerIdn();
+
 	Map getHipsActionWithActionCode();
 }
