@@ -10,7 +10,7 @@ public class HipsActionVO implements Serializable {
 	private Integer hipsActionIdn;
 	private Integer computerIdn;
 	private String actionTaken;
-	private String actionCode;
+	private Integer actionCode;
 	private Date actionDate;
 	private String application;
 
@@ -38,11 +38,11 @@ public class HipsActionVO implements Serializable {
 		this.actionTaken = actionTaken;
 	}
 
-	public String getActionCode() {
+	public Integer getActionCode() {
 		return actionCode;
 	}
 
-	public void setActionCode(String actionCode) {
+	public void setActionCode(Integer actionCode) {
 		this.actionCode = actionCode;
 	}
 
