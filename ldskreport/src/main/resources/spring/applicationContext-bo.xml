@@ -69,6 +69,7 @@
 				<property name="hipsActionBO" ref="hipsActionBO" />
 				<property name="deviceControlActionBO" ref="deviceControlActionBO" />
 				<property name="reportBO" ref="reportBO" />
+				<property name="computerDAO" ref="computerDAO" />
 			</bean>
 		</property>
 	</bean>
