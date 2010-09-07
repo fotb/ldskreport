@@ -18,7 +18,7 @@
 		<property name="actionCode" type="integer" column="ACTIONCODE" />
 		<property name="actionDate" type="timestamp" column="ACTIONDATE" />
 		<property name="actionType" type="integer" column="ACTIONTYPE" />
-		<property name="userName" type="string" column="USENAME" />
+		<property name="userName" type="string" column="USERNAME" />
 		<property name="configGuid" type="string" column="CONFIGGUID" />
 	</class>
 </hibernate-mapping>
