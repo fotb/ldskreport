@@ -16,14 +16,16 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.springframework.core.io.ClassPathResource;
 
+import com.report.dao.IComputerDAO;
 import com.report.util.AppException;
 import com.report.util.Constants;
+import com.report.util.DateUtil;
 import com.report.util.ReportPropertiesLocator;
 import com.report.vo.ComputerVO;
 import com.report.vo.DeviceControlActionVO;
 import com.report.vo.HipsActionVO;
 import com.report.vo.SafeReportDTO;
-import com.sun.corba.se.impl.orbutil.closure.Constant;
+import com.report.vo.TcpVO;
 
 public class SafeReportImpl implements ISafeReport {
 	private static final Logger logger = Logger.getLogger(SafeReportImpl.class);
@@ -31,6 +33,18 @@ public class SafeReportImpl implements ISafeReport {
 	private IHipsActionBO hipsActionBO;
 	private IDeviceControlActionBO deviceControlActionBO;
 	private IReportBO reportBO;
+	private IComputerDAO computerDAO;
+	
+	private Map ipMap = new HashMap();
+	private Map computerMap = new HashMap();
+
+	public IComputerDAO getComputerDAO() {
+		return computerDAO;
+	}
+
+	public void setComputerDAO(IComputerDAO computerDAO) {
+		this.computerDAO = computerDAO;
+	}
 
 	public IReportBO getReportBO() {
 		return reportBO;
@@ -145,6 +159,10 @@ public class SafeReportImpl implements ISafeReport {
         HSSFWorkbook wb = null;
         final FileInputStream fis = null;
         try {
+        	
+        	ipMap = reportBO.findAllIpAddress();
+        	computerMap = computerDAO.findAllToMap();
+        	
         	final String templateFile = ReportPropertiesLocator.getInstance(true).getValue(Constants.REPORT_SAFE_INFO_KEY);
         	final ClassPathResource resource = new ClassPathResource(templateFile);
 			fs = new POIFSFileSystem(resource.getInputStream());
@@ -170,99 +188,41 @@ public class SafeReportImpl implements ISafeReport {
 	        List sourceList = getDataSource();
 	        for (Iterator iter = sourceList.iterator(); iter.hasNext();) {
 				SafeReportDTO dto = (SafeReportDTO) iter.next();
+				writer.setCurrSheetNum(0);
+				writer.newRow();
+		        writer.newCell(cellStyle);
+		        writer.writeToCurrentCell(dto.getBranchName());
+		        writer.setCurrSheetNum(1);
 		        writer.newRow();
 		        writer.newCell(cellStyle);
 		        writer.writeToCurrentCell(dto.getBranchName());
 		        
+		        writerSatInfo(writer, cellStyle, tempCellStyle, 
+		        		"主机侵入保护安全活动次数：", String.valueOf(dto.getHipsActionCount()), 
+		        		dto.getHipsActionMap(), Constants.HIPS_ACTION_MAP);
+		        
+		        writerSatInfo(writer, cellStyle, tempCellStyle, 
+		        		"设备控制次数：", String.valueOf(dto.getDeviceControlActionCount()), 
+		        		dto.getDeviceControlActionMap(), Constants.DEVICE_CONTROL_ACTION_MAP);
+		        
+		        writer.setCurrSheetNum(1);
 		        writer.newRow();
 		        writer.newCell(cellStyle);
-		        writer.writeToCurrentCell("主机侵入保护安全活动次数：");
-		        writer.newCell(tempCellStyle);
-		        writer.writeToCurrentCell(String.valueOf(dto.getHipsActionCount()));
-		        
-		        Map hipsByCodeMap = dto.getHipsActionMap();
-		        List otherList = new ArrayList();
-		        int index = 1;
-		        for (Iterator iter1 = dto.getHipsActionMap().keySet().iterator(); iter1
-						.hasNext();) {
-					String actionCode = (String) iter1.next();
-					List tempList = (List) hipsByCodeMap.get(actionCode);
-					if(Constants.HIPS_ACTION_MAP.containsKey(actionCode)) {
-						writer.newRow();
-						writer.newCell(tempCellStyle);
-						writer.newCell(tempCellStyle);
-						writer.newCell(tempCellStyle);
-						writer.writeToCurrentCell(String.valueOf(index));
-						writer.newCell(cellStyle);
-						writer.writeToCurrentCell(Constants.HIPS_ACTION_MAP.get(actionCode) + ":");					
-						writer.newCell(tempCellStyle);
-						writer.writeToCurrentCell(String.valueOf(tempList.size()));		
-						
-						index++;
-					} else {
-						otherList.addAll(tempList);
-					}
-				}
-		        if(!otherList.isEmpty()) {
-			        writer.newRow();
-					writer.newCell(tempCellStyle);
-					writer.newCell(tempCellStyle);
-					writer.newCell(tempCellStyle);
-					writer.writeToCurrentCell(String.valueOf(index++));
-					writer.newCell(cellStyle);
-					writer.writeToCurrentCell("其他事件:");					
-					writer.newCell(tempCellStyle);
-					writer.writeToCurrentCell(String.valueOf(otherList.size()));
-		        }
+		        writer.writeToCurrentCell("主机侵入保护详细信息");
+		        writerHipsDetailInfo(writer, cellStyle, tempCellStyle, dto.getHipsActionMap());
+
 		        writer.newRow();
-		        
+		        writer.setCurrSheetNum(1);
 		        writer.newRow();
 		        writer.newCell(cellStyle);
-		        writer.writeToCurrentCell("设备控制次数：");
-		        writer.newCell(tempCellStyle);
-		        writer.writeToCurrentCell(String.valueOf(dto.getDeviceControlActionCount()));
-		        
-		        index = 1;
-		        Map dcByCodeMap = dto.getDeviceControlActionMap();
-		        otherList.clear();
-		        for (Iterator iter1 = dcByCodeMap.keySet().iterator(); iter1
-						.hasNext();) {
-					String actionCode = (String) iter1.next();
-					List tempList = (List) dcByCodeMap.get(actionCode);
-					if(Constants.DEVICE_CONTROL_ACTION_MAP.containsKey(actionCode)) {
-					writer.newRow();
-					writer.newCell(tempCellStyle);
-					writer.newCell(tempCellStyle);
-					writer.newCell(tempCellStyle);
-					writer.writeToCurrentCell(String.valueOf(index));
-					writer.newCell(cellStyle);
-					writer.writeToCurrentCell(Constants.DEVICE_CONTROL_ACTION_MAP.get(actionCode) + ":");					
-					writer.newCell(tempCellStyle);
-					writer.writeToCurrentCell(String.valueOf(tempList.size()));		
-					
-					index++;
-					} else {
-						otherList.addAll(tempList);
-					}
-				}
-		        
-		        if(!otherList.isEmpty()) {
-			        writer.newRow();
-					writer.newCell(tempCellStyle);
-					writer.newCell(tempCellStyle);
-					writer.newCell(tempCellStyle);
-					writer.writeToCurrentCell(String.valueOf(index++));
-					writer.newCell(cellStyle);
-					writer.writeToCurrentCell("其他事件:");					
-					writer.newCell(tempCellStyle);
-					writer.writeToCurrentCell(String.valueOf(otherList.size()));
-		        }
-		        writer.newRow();
+		        writer.writeToCurrentCell("设备控制详细信息");
+		        writerDeviceControlDetailInfo(writer, cellStyle, tempCellStyle, dto.getDeviceControlActionMap());
 			}
 	        
 	        
         } catch(Exception e) {
         	logger.error(e.getMessage(), e);
+        	throw new AppException(e.getMessage(), e);
         } finally{
             try {
                 if(fis != null){                    
@@ -273,5 +233,270 @@ public class SafeReportImpl implements ISafeReport {
             }
         } 
 		return wb;
+	}
+
+	private void writerSatInfo(final HSSFWorkbookWriter writer,
+			HSSFCellStyle cellStyle, HSSFCellStyle tempCellStyle,
+			String title, String totalCount, Map actionMap, Map constantsMap) {
+        writer.setCurrSheetNum(0);
+        writer.newRow();
+		writer.newCell(cellStyle);
+		//writer.writeToCurrentCell("主机侵入保护安全活动次数：");
+		writer.writeToCurrentCell(title);
+		writer.newCell(tempCellStyle);
+		writer.writeToCurrentCell(totalCount);
+		
+//		Map hipsByCodeMap = dto.getHipsActionMap();
+		List otherList = new ArrayList();
+		int index = 1;
+		for (Iterator iter1 = actionMap.keySet().iterator(); iter1
+				.hasNext();) {
+			String actionCode = (String) iter1.next();
+			List tempList = (List) actionMap.get(actionCode);
+			if(constantsMap.containsKey(actionCode)) {
+				writer.newRow();
+				writer.newCell(tempCellStyle);
+				writer.newCell(tempCellStyle);
+				writer.newCell(tempCellStyle);
+				writer.writeToCurrentCell(String.valueOf(index));
+				writer.newCell(cellStyle);
+				writer.writeToCurrentCell(constantsMap.get(actionCode) + ":");					
+				writer.newCell(tempCellStyle);
+				writer.writeToCurrentCell(String.valueOf(tempList.size()));		
+				
+				index++;
+			} else {
+				otherList.addAll(tempList);
+			}
+		}
+		if(!otherList.isEmpty()) {
+		    writer.newRow();
+			writer.newCell(tempCellStyle);
+			writer.newCell(tempCellStyle);
+			writer.newCell(tempCellStyle);
+			writer.writeToCurrentCell(String.valueOf(index++));
+			writer.newCell(cellStyle);
+			writer.writeToCurrentCell("其他事件:");					
+			writer.newCell(tempCellStyle);
+			writer.writeToCurrentCell(String.valueOf(otherList.size()));
+		}
+		writer.newRow();
+	}
+	
+	private void writerHipsDetailInfo(final HSSFWorkbookWriter writer,HSSFCellStyle cellStyle, HSSFCellStyle tempCellStyle,Map actionMap) {
+		writer.setCurrSheetNum(1);
+		List otherList = new ArrayList();
+		
+		for (Iterator iter1 = actionMap.keySet().iterator(); iter1
+				.hasNext();) {
+			String actionCode = (String) iter1.next();
+			List tempList = (List) actionMap.get(actionCode);
+			if(Constants.HIPS_ACTION_MAP.containsKey(actionCode)) {
+				writerHipsHeader(writer, cellStyle, tempCellStyle, Constants.HIPS_ACTION_MAP.get(actionCode).toString());
+				writerHipsRowInfo(writer, tempCellStyle,tempList);
+			} else {
+				otherList.addAll(tempList);
+			}
+		}
+		if(!otherList.isEmpty()) {
+			writerHipsHeader(writer, cellStyle, tempCellStyle, "其他事件");
+			writerHipsRowInfo(writer, tempCellStyle, otherList);
+		}
+	}
+
+	private void writerHipsRowInfo(final HSSFWorkbookWriter writer,
+			HSSFCellStyle tempCellStyle, List tempList) {
+		int index = 1;
+		for (Iterator iter = tempList.iterator(); iter
+				.hasNext();) {
+			HipsActionVO vo = (HipsActionVO) iter.next();
+			writer.newRow();
+			writer.newCell(tempCellStyle);
+			writer.newCell(tempCellStyle);
+			writer.writeToCurrentCell(String.valueOf(index));
+			writer.newCell(tempCellStyle);
+			final ComputerVO computerVO = (ComputerVO) computerMap.get(String.valueOf(vo.getComputerIdn().intValue()));
+			writer.writeToCurrentCell(computerVO.getDeviceName());
+			writer.newCell(tempCellStyle);					
+			final TcpVO tcpVO = (TcpVO)ipMap.get(String.valueOf(vo.getComputerIdn().intValue()));
+			writer.writeToCurrentCell(tcpVO.getAddress());
+			writer.newCell(tempCellStyle);
+			writer.writeToCurrentCell(DateUtil.format(vo.getActionDate(), "yyyy-MM-dd HH:mm:ss"));
+			writer.newCell(tempCellStyle);
+			writer.writeToCurrentCell(vo.getApplication());
+			index++;
+		}
+		writer.newRow();
+	}
+	
+	
+	private void writerDeviceControlDetailInfo(final HSSFWorkbookWriter writer,HSSFCellStyle cellStyle, HSSFCellStyle tempCellStyle,Map actionMap) {
+		writer.setCurrSheetNum(1);
+		
+		List otherList = new ArrayList();
+		
+		for (Iterator iter1 = actionMap.keySet().iterator(); iter1
+				.hasNext();) {
+			String actionCode = (String) iter1.next();
+			List tempList = (List) actionMap.get(actionCode);
+			if(Constants.DEVICE_CONTROL_ACTION_MAP.containsKey(actionCode)) {
+				if(Constants.DEVICE_CONTROL_ACTION_CODE_115.equals(actionCode) || Constants.DEVICE_CONTROL_ACTION_CODE_116.equals(actionCode)) {
+					writerDeviceControlHeader(writer, cellStyle, tempCellStyle,Constants.DEVICE_CONTROL_ACTION_MAP.get(actionCode).toString());
+					writerDeviceControlRowInfo(writer, tempCellStyle, ipMap, tempList);
+				} else {
+					writerDeviceControlSpecialHeader(writer, cellStyle, tempCellStyle,Constants.DEVICE_CONTROL_ACTION_MAP.get(actionCode).toString());
+					writerDeviceControlSpecialRowInfo(writer, tempCellStyle, ipMap, tempList);
+				}
+				
+			} else {
+				otherList.addAll(tempList);
+			}
+		}
+		if(!otherList.isEmpty()) {
+			writerDeviceControlHeader(writer, cellStyle, tempCellStyle,"其他事件");
+			writerDeviceControlRowInfo(writer, tempCellStyle, ipMap, otherList);
+		}
+		
+	}
+	
+	
+	private void writerDeviceControlRowInfo(final HSSFWorkbookWriter writer,
+			HSSFCellStyle tempCellStyle, final Map ipMap, List tempList) {
+		int index = 1;
+		for (Iterator iter = tempList.iterator(); iter
+				.hasNext();) {
+			DeviceControlActionVO vo = (DeviceControlActionVO) iter.next();
+			writer.newRow();
+			writer.newCell(tempCellStyle);
+			writer.newCell(tempCellStyle);
+			writer.writeToCurrentCell(String.valueOf(index));
+			writer.newCell(tempCellStyle);
+			final ComputerVO computerVO = (ComputerVO) computerMap.get(String.valueOf(vo.getComputerIdn().intValue()));
+			writer.writeToCurrentCell(computerVO.getDeviceName());
+			writer.newCell(tempCellStyle);					
+			final TcpVO tcpVO = (TcpVO)ipMap.get(String.valueOf(vo.getComputerIdn().intValue()));
+			writer.writeToCurrentCell(tcpVO.getAddress());
+			writer.newCell(tempCellStyle);
+			writer.writeToCurrentCell(DateUtil.format(vo.getActionDate(), "yyyy-MM-dd HH:mm:ss"));
+			writer.newCell(tempCellStyle);
+			writer.writeToCurrentCell(vo.getDescription());
+			writer.newCell(tempCellStyle);
+			writer.writeToCurrentCell(vo.getDeviceId());
+			index++;
+		}
+		writer.newRow();
+	}
+	
+	
+	private void writerDeviceControlSpecialRowInfo(final HSSFWorkbookWriter writer,
+			HSSFCellStyle tempCellStyle, final Map ipMap, List tempList) {
+		int index = 1;
+		for (Iterator iter = tempList.iterator(); iter
+				.hasNext();) {
+			DeviceControlActionVO vo = (DeviceControlActionVO) iter.next();
+			writer.newRow();
+			writer.newCell(tempCellStyle);
+			writer.newCell(tempCellStyle);
+			writer.writeToCurrentCell(String.valueOf(index));
+			writer.newCell(tempCellStyle);
+			final ComputerVO computerVO = (ComputerVO) computerMap.get(String.valueOf(vo.getComputerIdn().intValue()));
+			writer.writeToCurrentCell(computerVO.getDeviceName());
+			writer.newCell(tempCellStyle);					
+			final TcpVO tcpVO = (TcpVO)ipMap.get(String.valueOf(vo.getComputerIdn()));
+			writer.writeToCurrentCell(tcpVO.getAddress());
+			writer.newCell(tempCellStyle);
+			writer.writeToCurrentCell(DateUtil.format(vo.getActionDate(), "yyyy-MM-dd HH:mm:ss"));
+			writer.newCell(tempCellStyle);
+			writer.writeToCurrentCell(vo.getDescription());
+			writer.newCell(tempCellStyle);
+			writer.writeToCurrentCell(vo.getHardwareId());
+			writer.newCell(tempCellStyle);
+			writer.writeToCurrentCell(vo.getService());
+			writer.newCell(tempCellStyle);
+			writer.writeToCurrentCell(vo.getDeviceClass());
+			writer.newCell(tempCellStyle);
+			writer.writeToCurrentCell(vo.getEnumerator());
+			writer.newCell(tempCellStyle);
+			writer.writeToCurrentCell(vo.getVendorId());
+			writer.newCell(tempCellStyle);
+			writer.writeToCurrentCell(vo.getDeviceId());
+			index++;
+		}
+		writer.newRow();
+	}
+	
+	private void writerHipsHeader(final HSSFWorkbookWriter writer, HSSFCellStyle cellStyle, HSSFCellStyle tempCellStyle, String subject) {	
+        writer.setCurrSheetNum(1);
+		writer.newRow();
+		writer.newCell(tempCellStyle);
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell(subject);
+		writer.newRow();
+		writer.newCell(tempCellStyle);
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("序号");
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("设备名称");
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("ip地址");
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("操作日期");
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("应用程序名称");
+	}
+	
+	private void writerDeviceControlHeader(final HSSFWorkbookWriter writer, HSSFCellStyle cellStyle, HSSFCellStyle tempCellStyle, String subject) {	
+        writer.setCurrSheetNum(1);
+		writer.newRow();
+		writer.newCell(tempCellStyle);
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell(subject);
+		writer.newRow();
+		writer.newCell(tempCellStyle);
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("序号");
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("设备名称");
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("ip地址");
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("操作日期");
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("说明");
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("硬件ID");
+	}
+	
+	
+	private void writerDeviceControlSpecialHeader(final HSSFWorkbookWriter writer, HSSFCellStyle cellStyle, HSSFCellStyle tempCellStyle, String subject) {	
+        writer.setCurrSheetNum(1);
+		writer.newRow();
+		writer.newCell(tempCellStyle);
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell(subject);
+		writer.newRow();
+		writer.newCell(tempCellStyle);
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("序号");
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("设备名称");
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("ip地址");
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("操作日期");
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("说明");
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("硬件ID");
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("服务");
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("类");
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("枚举器");
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("供应商ID");
+		writer.newCell(cellStyle);
+		writer.writeToCurrentCell("设备ID");
 	}
 }
