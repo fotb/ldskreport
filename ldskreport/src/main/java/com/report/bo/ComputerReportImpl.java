@@ -176,6 +176,7 @@ public class ComputerReportImpl implements IComputerReport{
 	        
         } catch(Exception e) {
         	logger.error(e.getMessage(), e);
+        	throw new AppException(e.getMessage(), e);
         } finally{
             try {
                 if(fis != null){                    

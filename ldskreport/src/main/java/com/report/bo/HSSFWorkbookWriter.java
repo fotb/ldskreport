@@ -132,7 +132,7 @@ class HSSFWorkbookWriter {
      * get current sheet
      * @return HSSFSheet
      */
-    private HSSFSheet getCurrentSheet() {
+    public HSSFSheet getCurrentSheet() {
         return targetWB.getSheetAt(currSheetNum);
     }
     public int getCurrSheetNum() {
@@ -149,8 +149,12 @@ class HSSFWorkbookWriter {
      * get current row
      * @return HSSFRow
      */
-    private HSSFRow getCurrentRow() {           
+    public HSSFRow getCurrentRow() {           
         HSSFRow row = getCurrentSheet().getRow(currRowNum);
         return row;
     }
+
+	public int getCurrRowNum() {
+		return currRowNum;
+	}
 } // end of class HSSFWorkbookWriter
