@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
+import com.report.bo.IComputerReport;
 import com.report.bo.ISafeReport;
 
 public class ReportUtil {
@@ -16,31 +17,45 @@ public class ReportUtil {
 	 */
 	public static void main(String[] args) {
 		try {
-//			final IComputerReport bo = (IComputerReport) SpringUtil.getBean("computerReport");
-//			final HSSFWorkbook workbook = bo.renderExcelReport();
-//			if(null != workbook) {
-//				final String reportPath = ReportPropertiesLocator.getInstance(true).getValue(Constants.REPORT_OUTPUT_PATH);
-//				final String reportFileName = reportPath + "report_" + System.currentTimeMillis() + ".xls";
-//				generateExcelFile(workbook, reportFileName);
-//			} else {
-//				logger.error("create excel failed!!");
-//			}
-			
-			
-			final ISafeReport bo = (ISafeReport) SpringUtil.getBean("safeReport");
-			final HSSFWorkbook workbook = bo.renderExcelReport();
-			if(null != workbook) {
+			final IComputerReport computerReportBO = (IComputerReport) SpringUtil.getBean("computerReport");
+			logger.info("开始生成电脑详细信息表...");
+			final HSSFWorkbook workbook1 = computerReportBO.renderExcelReport();
+			String reportFileName = "";
+			if(null != workbook1) {
 				final String reportPath = ReportPropertiesLocator.getInstance(true).getValue(Constants.REPORT_OUTPUT_PATH);
-				final String reportFileName = reportPath + "report_" + System.currentTimeMillis() + ".xls";
-				generateExcelFile(workbook, reportFileName);
+				reportFileName = reportPath + "ComputerReport_" + System.currentTimeMillis() + ".xls";
+				generateExcelFile(workbook1, reportFileName);
 			} else {
-				logger.error("create excel failed!!");
+				throw new AppException("create excel failed!!");
 			}
+			logger.info("生成电脑详细信息表结束!请到以下目录查看:");
+			logger.info(reportFileName);
 		} catch (AppException e) {
 			logger.error(e.getMessage(), e);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
+			
+		try {
+			final ISafeReport safeReportBO = (ISafeReport) SpringUtil.getBean("safeReport");
+			logger.info("开始生成安全信息报表...");
+			final HSSFWorkbook workbook2 = safeReportBO.renderExcelReport();
+			String reportFileName = "";
+			if(null != workbook2) {
+				final String reportPath = ReportPropertiesLocator.getInstance(true).getValue(Constants.REPORT_OUTPUT_PATH);
+				reportFileName = reportPath + "SafeReport_" + System.currentTimeMillis() + ".xls";
+				generateExcelFile(workbook2, reportFileName);
+			} else {
+				throw new AppException("create excel failed!!");
+			}
+			logger.info("生成安全信息报表结束!请到以下目录查看:");
+			logger.info(reportFileName);
+		} catch (AppException e) {
+			logger.error(e.getMessage(), e);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		
 	}
 
 	
