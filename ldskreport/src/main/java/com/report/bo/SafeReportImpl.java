@@ -181,10 +181,15 @@ public class SafeReportImpl implements ISafeReport {
 	        HSSFCellStyle cellStyle = sheet.getRow(1).getCell(0).getCellStyle();
 	        HSSFCellStyle tempCellStyle = sheet.getRow(1).getCell(1).getCellStyle();
 	        
+	        final int totalHipsCount = hipsActionBO.findAll().size();
+	        final int totalDeviceControlCount = deviceControlActionBO.findAll().size();
 	        
+//	        HSSFRow hssfRow = sheet.getRow(0);
+	        writer.writeTo(0, 1, 1, String.valueOf(totalHipsCount + totalDeviceControlCount));
+	        writer.writeTo(0, 1, 4, String.valueOf(totalHipsCount));
+	        writer.writeTo(0, 1, 6, String.valueOf(totalDeviceControlCount));
 	        writer.newRow();
-	        writer.newRow();
-	        writer.newRow();
+	        
 	        List sourceList = getDataSource();
 	        for (Iterator iter = sourceList.iterator(); iter.hasNext();) {
 				SafeReportDTO dto = (SafeReportDTO) iter.next();

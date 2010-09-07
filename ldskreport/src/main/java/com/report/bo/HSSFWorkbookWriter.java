@@ -20,7 +20,7 @@ class HSSFWorkbookWriter {
     private HSSFRow rowTemplate;
     private int currSheetNum = 0;
     private int currRowNum = 0;
-    private short currColNum = -1;
+    private int currColNum = -1;
     private Map sheetRowMap = new HashMap();
     private Map styleMap = new HashMap();
     
@@ -41,7 +41,7 @@ class HSSFWorkbookWriter {
      * @param colNum column number
      * @param value value
      */
-    public void writeTo(final int sheetNo, final int rowNum, final short colNum, final Object value) {
+    public void writeTo(final int sheetNo, final int rowNum, final int colNum, final Object value) {
         final HSSFSheet sheet = targetWB.getSheetAt(sheetNo);
         final HSSFRow row = sheet.getRow(rowNum);
         final HSSFCell cell = row.getCell(colNum);
@@ -101,7 +101,7 @@ class HSSFWorkbookWriter {
      */
     public HSSFCell newCell(){
         currColNum++;
-        HSSFCellStyle style = (HSSFCellStyle) styleMap.get(new Short(currColNum));
+        HSSFCellStyle style = (HSSFCellStyle) styleMap.get(String.valueOf(currColNum));
         if(style == null) {
             HSSFCell firstCell = rowTemplate.getCell(currColNum);
             style = targetWB.createCellStyle();
@@ -113,7 +113,7 @@ class HSSFWorkbookWriter {
             style.setBorderTop(firstCell.getCellStyle().getBorderTop());
             style.setBottomBorderColor(firstCell.getCellStyle().getBottomBorderColor());   
             style.setAlignment(firstCell.getCellStyle().getAlignment());   
-            styleMap.put(new Short(currColNum), style);
+            styleMap.put(String.valueOf(currColNum), style);
         }
         final HSSFRow row  = getCurrentRow();
         final HSSFCell cell = row.createCell(currColNum);
