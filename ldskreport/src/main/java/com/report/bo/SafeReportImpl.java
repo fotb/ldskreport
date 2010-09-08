@@ -351,7 +351,7 @@ public class SafeReportImpl implements ISafeReport {
 			String actionCode = (String) iter1.next();
 			List tempList = (List) actionMap.get(actionCode);
 			if(Constants.DEVICE_CONTROL_ACTION_MAP.containsKey(actionCode)) {
-				if(Constants.DEVICE_CONTROL_ACTION_CODE_115.equals(actionCode) || Constants.DEVICE_CONTROL_ACTION_CODE_116.equals(actionCode)) {
+				if(Constants.DEVICE_CONTROL_ACTION_CODE_115.equals(actionCode) || Constants.DEVICE_CONTROL_ACTION_CODE_117.equals(actionCode)) {
 					writerDeviceControlHeader(writer, cellStyle, tempCellStyle,Constants.DEVICE_CONTROL_ACTION_MAP.get(actionCode).toString());
 					writerDeviceControlRowInfo(writer, tempCellStyle, ipMap, tempList);
 				} else {
