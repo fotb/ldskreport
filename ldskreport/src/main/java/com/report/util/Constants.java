@@ -31,23 +31,23 @@ public class Constants {
 		HIPS_ACTION_MAP.put(HIPS_ACTION_CODE_113, "未授权程序程序试图执行");
 		HIPS_ACTION_MAP.put(HIPS_ACTION_CODE_104, "程序添加到系统启动项目");
 		HIPS_ACTION_MAP.put(HIPS_ACTION_CODE_100, "检测到不允许的文件访问");
-		HIPS_ACTION_MAP.put(HIPS_ACTION_CODE_109, "检测到尝试修改执行文件");
+		HIPS_ACTION_MAP.put(HIPS_ACTION_CODE_109, "检测到尝试修改可执行文件");
 		HIPS_ACTION_MAP.put(HIPS_ACTION_CODE_106, "不允许注册表写尝试");
 		HIPS_ACTION_MAP.put(HIPS_ACTION_CODE_105, "此软件已安装");
 	};
 	
 	
 //	115-----已禁用存储设备
-//	116---- 已禁用CD/DVD设备
-//	117-----其他禁用设备
+//	116---- 其他禁用设备
+//	117-----已禁用CD/DVD设备
 	public static final String DEVICE_CONTROL_ACTION_CODE_115 = "115";
 	public static final String DEVICE_CONTROL_ACTION_CODE_116 = "116";
 	public static final String DEVICE_CONTROL_ACTION_CODE_117 = "117";
 	public static final Map DEVICE_CONTROL_ACTION_MAP = new HashMap();
 	static {
 		DEVICE_CONTROL_ACTION_MAP.put(DEVICE_CONTROL_ACTION_CODE_115, "已禁用存储设备");
-		DEVICE_CONTROL_ACTION_MAP.put(DEVICE_CONTROL_ACTION_CODE_116, "已禁用CD/DVD设备");
-		DEVICE_CONTROL_ACTION_MAP.put(DEVICE_CONTROL_ACTION_CODE_117, "其他禁用设备");
+		DEVICE_CONTROL_ACTION_MAP.put(DEVICE_CONTROL_ACTION_CODE_116, "其他禁用设备");
+		DEVICE_CONTROL_ACTION_MAP.put(DEVICE_CONTROL_ACTION_CODE_117, "已禁用CD/DVD设备");
 	};
 		
 	public static final String REPORT_HEADER_COMPUTERNAME = "report.header.computername";
