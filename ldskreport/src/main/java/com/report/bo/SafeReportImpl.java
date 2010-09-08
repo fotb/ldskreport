@@ -116,38 +116,43 @@ public class SafeReportImpl implements ISafeReport {
 			SafeReportDTO dto = new SafeReportDTO();
 			dto.setBranchName(branchName);
 			final List list = (List)hipsMap.get(branchName);
-			dto.setHipsActionCount(list.size());
-			Map hipsByCodeMap = new HashMap();
-			for (Iterator iter2 = list.iterator(); iter2.hasNext();) {
-				HipsActionVO hipsActionVO = (HipsActionVO) iter2.next();
-				final String actionCode = String.valueOf(hipsActionVO.getActionCode().intValue());
-				if(hipsByCodeMap.containsKey(actionCode)) {
-					final List temp = (List)hipsByCodeMap.get(actionCode);
-					temp.add(hipsActionVO);
-				} else {
-					List temp = new ArrayList();
-					temp.add(hipsActionVO);
-					hipsByCodeMap.put(actionCode, temp);
+			if(null != list) {
+				dto.setHipsActionCount(list.size());
+				Map hipsByCodeMap = new HashMap();
+				for (Iterator iter2 = list.iterator(); iter2.hasNext();) {
+					HipsActionVO hipsActionVO = (HipsActionVO) iter2.next();
+					final String actionCode = String.valueOf(hipsActionVO.getActionCode().intValue());
+					if(hipsByCodeMap.containsKey(actionCode)) {
+						final List temp = (List)hipsByCodeMap.get(actionCode);
+						temp.add(hipsActionVO);
+					} else {
+						List temp = new ArrayList();
+						temp.add(hipsActionVO);
+						hipsByCodeMap.put(actionCode, temp);
+					}
 				}
+				
+				dto.setHipsActionMap(hipsByCodeMap);
 			}
 			
-			dto.setHipsActionMap(hipsByCodeMap);
 			final List dcList = (List)deviceControlMap.get(branchName);
-			dto.setDeviceControlActionCount(dcList.size());
-			Map dcByCodeMap = new HashMap();
-			for (Iterator iter2 = dcList.iterator(); iter2.hasNext();) {
-				DeviceControlActionVO vo = (DeviceControlActionVO) iter2.next();
-				final String actionCode = String.valueOf(vo.getActionCode().intValue());
-				if(dcByCodeMap.containsKey(actionCode)) {
-					final List temp = (List)dcByCodeMap.get(actionCode);
-					temp.add(vo);
-				} else {
-					List temp = new ArrayList();
-					temp.add(vo);
-					dcByCodeMap.put(actionCode, temp);
+			if(null != dcList) {
+				dto.setDeviceControlActionCount(dcList.size());
+				Map dcByCodeMap = new HashMap();
+				for (Iterator iter2 = dcList.iterator(); iter2.hasNext();) {
+					DeviceControlActionVO vo = (DeviceControlActionVO) iter2.next();
+					final String actionCode = String.valueOf(vo.getActionCode().intValue());
+					if(dcByCodeMap.containsKey(actionCode)) {
+						final List temp = (List)dcByCodeMap.get(actionCode);
+						temp.add(vo);
+					} else {
+						List temp = new ArrayList();
+						temp.add(vo);
+						dcByCodeMap.put(actionCode, temp);
+					}
 				}
+				dto.setDeviceControlActionMap(dcByCodeMap);
 			}
-			dto.setDeviceControlActionMap(dcByCodeMap);
 			result.add(dto);
 		}
 		return result;
@@ -222,6 +227,7 @@ public class SafeReportImpl implements ISafeReport {
 		        writer.newCell(cellStyle);
 		        writer.writeToCurrentCell("设备控制详细信息");
 		        writerDeviceControlDetailInfo(writer, cellStyle, tempCellStyle, dto.getDeviceControlActionMap());
+		        writer.newRow();
 			}
 	        
 	        
